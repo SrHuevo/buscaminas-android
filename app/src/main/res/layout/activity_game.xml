@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="es.daniel.buscaminas.view.game.GameActivity">
+
+    <LinearLayout
+        android:id="@+id/layout_time"
+        android:layout_width="fill_parent"
+        android:layout_height="60sp"
+        android:orientation="horizontal"
+        android:layout_alignParentTop="true">
+
+        <TextView
+            android:id="@+id/rest"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:textSize="40dp"
+            android:gravity="center_vertical"
+            android:paddingLeft="10dp"
+            android:textColor="@color/colorAccent"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/surrender"
+            android:layout_width="60sp"
+            android:layout_height="fill_parent"
+            android:background="@drawable/ic_sentiment_dissatisfied_black_24dp"/>
+
+        <TextView
+            android:id="@+id/timer"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:textSize="40dp"
+            android:paddingRight="10dp"
+            android:gravity="center_vertical|right"
+            android:textColor="@color/colorPrimaryDark"
+            android:text="00:00"/>
+    </LinearLayout>
+
+    <ScrollView
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:fillViewport="true"
+        android:layout_below="@+id/layout_time"
+        android:layout_centerHorizontal="true">
+
+        <HorizontalScrollView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <LinearLayout
+                    android:id="@+id/layout_game"
+                    android:background="#505151"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_centerVertical="true"
+                    android:layout_centerHorizontal="true">
+
+                </LinearLayout>
+
+            </RelativeLayout>
+
+
+
+
+        </HorizontalScrollView>
+    </ScrollView>
+
+</RelativeLayout>

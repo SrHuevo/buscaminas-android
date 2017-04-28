@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Buscaminas</string>
+    <string name="hello">¡Bienvenido!</string>
+    <string name="desc">Introduce los parametros para crear el juego</string>
+    <string name="width">Número de casillas para el ancho del tablero</string>
+    <string name="height">Número de casillas para el alto del tablero</string>
+    <string name="mines">Número de minas</string>
+    <string name="create">Crear</string>
+    <string name="title_activity_home">HomeActivity</string>
+</resources>
