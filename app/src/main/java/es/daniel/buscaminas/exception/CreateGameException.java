@@ -18,8 +18,4 @@ public class CreateGameException extends Exception {
 	public CreateGameException(String message, Throwable cause) {
 		super(message, cause);
 	}
-	
-	public CreateGameException(String message, Throwable cause, boolean enableSuppression, boolean writeableStackTrace) {
-		super(message, cause, enableSuppression, writeableStackTrace);
-	}
 }

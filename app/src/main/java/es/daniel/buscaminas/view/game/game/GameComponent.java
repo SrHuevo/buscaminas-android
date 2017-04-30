@@ -1,13 +1,10 @@
-package es.daniel.buscaminas.view.game;
+package es.daniel.buscaminas.view.game.game;
 
 import android.app.Activity;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.util.TypedValue;
-import android.view.Gravity;
-import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import es.daniel.buscaminas.R;
 import es.daniel.buscaminas.data.BoxView;
@@ -15,10 +12,8 @@ import es.daniel.buscaminas.data.BoxesViews;
 import es.daniel.buscaminas.data.GameState;
 import es.daniel.buscaminas.exception.CreateGameException;
 import es.daniel.buscaminas.data.Box;
-import es.daniel.buscaminas.data.BoxState;
 import es.daniel.buscaminas.logic.Game;
-import es.daniel.buscaminas.logic.MineFinderGame;
-import es.daniel.buscaminas.data.Table;
+import es.daniel.buscaminas.logic.Table;
 
 public abstract class GameComponent {
 
@@ -68,6 +63,8 @@ public abstract class GameComponent {
         return game.getState();
     }
 
+    public int getMinesTotal() { return game.getMinesTotal(); }
+
     private void initParams() {
         layoutGame = (LinearLayout) context.findViewById(R.id.layout_game);
 
@@ -98,11 +95,9 @@ public abstract class GameComponent {
             layoutRow.setLayoutParams(layoutParams4Row);
             layoutGame.addView(layoutRow);
             for(int i = 0; i < nBoxWidth; i++) {
-                TextView boxView = new TextView(context);
+                ImageView boxView = new ImageView(context);
                 boxView.setLayoutParams(layoutParams4Box);
                 boxView.setBackgroundResource(R.mipmap.box_close);
-                boxView.setTextSize(TypedValue.COMPLEX_UNIT_PX, widthBox * 0.8f);
-                boxView.setGravity(Gravity.CENTER);
                 layoutRow.addView(boxView);
                 boxesViews.add(i, j, new BoxView(boxView));
             }
@@ -112,70 +107,23 @@ public abstract class GameComponent {
 
     private void createGame(final BoxesViews boxesViews) throws CreateGameException {
         table = new Table(nBoxWidth, nBoxHeight);
-
-
-        game = new MineFinderGame(table, nMines){
-            @Override
-            public void gameWin() {
-                GameComponent.this.gameWin();
-            }
-
-            @Override
-            public void gameOver() {
-                GameComponent.this.gameOver();
-            }
-
-            @Override
-            public void onListenerUnboxingBox(Box box) {
-                boxesViews.get(box.getX(), box.getY()).unboxing(box.getValue());
-                GameComponent.this.restToWin(game.restToWin());
-            }
-
-            @Override
-            public void onChangeBlockBox(Box box) {
-                boxesViews.get(box.getX(), box.getY()).changeBlockBox(box.getState());
-            }
-        };
-        for(int i = 0; i < nBoxHeight; i++) {
-            for(int j = 0; j < nBoxWidth; j++) {
-                int val = table.getBox(j, i).getValue();
-                System.out.print(" " + (val == -1 ? val : " " + val));
-            }
-            System.out.println();
-        }
+        game = new GameCoreView(this, table, nMines, boxesViews);
     }
 
     private void setFunctionality(BoxesViews boxesViews) {
         for(final Box box : table.getBoxesAsList()) {
             final BoxView boxView = boxesViews.get(box.getX(), box.getY());
-            boxView.getTextView().setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    if(box.getState() == BoxState.NO_USED.ordinal()) {
-                        game.unboxing(box.getX(), box.getY());
-                    }
-                }
-            });
-            boxView.getTextView().setOnLongClickListener(new View.OnLongClickListener() {
-                @Override
-                public boolean onLongClick(View v) {
-                    if(box.getState() != BoxState.USED.ordinal()) {
-                        game.changeBlockBox(box.getX(), box.getY());
-                    }
-                    return true;
-                }
-            });
+            boxView.getImageView().setOnClickListener(new ClickBoxGame(box, game));
+            boxView.getImageView().setOnLongClickListener(new LongClickBoxGame(box, game));
         }
-    }
-
-    public int getRestToWin() {
-        return game.restToWin();
     }
 
     public abstract void gameWin();
 
     public abstract void gameOver();
 
-    public abstract void restToWin(int howMany);
+    public abstract void lessCount();
+
+    public abstract void addCount();
 }
 

@@ -1,4 +1,4 @@
-package es.daniel.buscaminas.view.game;
+package es.daniel.buscaminas.view.game.timer;
 
 import android.app.Activity;
 import android.os.AsyncTask;

@@ -8,7 +8,6 @@ import es.daniel.buscaminas.data.Box;
 import es.daniel.buscaminas.data.BoxState;
 import es.daniel.buscaminas.data.BoxType;
 import es.daniel.buscaminas.data.GameState;
-import es.daniel.buscaminas.data.Table;
 import es.daniel.buscaminas.exception.CreateGameException;
 
 public abstract class MineFinderGame implements Game{
@@ -32,10 +31,20 @@ public abstract class MineFinderGame implements Game{
 	public void changeBlockBox(int x, int y)  {
 		Box box = table.getBox(x, y);
 		BoxState boxState;
-		if(box.getState() == BoxState.BLOCK.ordinal()) {
-			boxState = BoxState.NO_USED;
-		} else {
-			boxState = BoxState.BLOCK;
+		switch (BoxState.fromOrdinal(box.getState())) {
+			case NO_USED:
+				boxState = BoxState.BLOCK;
+				lessCount();
+				break;
+			case BLOCK:
+				boxState = BoxState.QUESTION;
+				addCount();
+				break;
+			case QUESTION:
+				boxState = BoxState.NO_USED;
+				break;
+			default:
+				boxState = BoxState.fromOrdinal(box.getState());
 		}
 		box.setState(boxState.ordinal());
 		onChangeBlockBox(box);
@@ -50,6 +59,38 @@ public abstract class MineFinderGame implements Game{
 			gameOver();
 		} else if(box.getValue() == BoxType.VOID) {
 			unboxingPieceFromVoidBox(box);
+		}
+	}
+
+	@Override
+	public void tryUnboxingNeighbors(int x, int y) {
+		Box box = table.getBox(x, y);
+		int valueAux = box.getValue();
+		for(Box neighbor : box.getNeighbors()) {
+			if(BoxState.fromOrdinal(neighbor.getState()) == BoxState.BLOCK) {
+				valueAux--;
+			}
+			if(valueAux == 0) {
+				break;
+			}
+		}
+		if(valueAux == 0) {
+			unboxingNeighborsNoBlock(box);
+		}
+	}
+
+	private void unboxingNeighborsNoBlock(Box box) {
+		for(Box neighbor : box.getNeighbors()) {
+			if(BoxState.fromOrdinal(neighbor.getState()) == BoxState.NO_USED ||
+					BoxState.fromOrdinal(neighbor.getState()) == BoxState.QUESTION) {
+				addUnboxing(neighbor);
+				if(neighbor.getValue() == BoxType.MINE) {
+					gameOver();
+				}
+				if(neighbor.getValue() == BoxType.VOID) {
+					unboxingPieceFromVoidBox(neighbor);
+				}
+			}
 		}
 	}
 	
@@ -105,11 +146,14 @@ public abstract class MineFinderGame implements Game{
 		}
 	}
 
-	@Override
-	public int restToWin() {
+	public int getMinesTotal() {
+		return mines;
+	}
+
+	private int restToWin() {
 		return table.getTotal() - unboxingBoxes - mines;
 	}
-	
+
 	@Override
 	public void restart() {
 		List<Box> boxesWithMines = setMines();

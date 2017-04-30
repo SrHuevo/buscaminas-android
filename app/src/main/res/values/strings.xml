@@ -7,4 +7,6 @@
     <string name="mines">Número de minas</string>
     <string name="create">Crear</string>
     <string name="title_activity_home">HomeActivity</string>
+    <string name="error_too_low">El número es demasiado pequeño, debe haber más de 10</string>
+    <string name="error_too_mines">Son demasiadas minas, deben ser menos del 40% del tablero</string>
 </resources>

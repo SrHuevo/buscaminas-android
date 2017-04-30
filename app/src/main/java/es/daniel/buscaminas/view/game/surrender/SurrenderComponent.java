@@ -1,4 +1,4 @@
-package es.daniel.buscaminas.view.game;
+package es.daniel.buscaminas.view.game.surrender;
 
 import android.app.Activity;
 import android.content.Intent;

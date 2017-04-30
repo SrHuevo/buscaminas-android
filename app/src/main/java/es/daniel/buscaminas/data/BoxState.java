@@ -1,7 +1,7 @@
 package es.daniel.buscaminas.data;
 
 public enum BoxState {
-	NO_USED, USED, BLOCK;
+	NO_USED, USED, BLOCK, QUESTION;
 
 	public static BoxState fromOrdinal(Integer ordinal) {
 		switch (ordinal){
@@ -11,6 +11,8 @@ public enum BoxState {
 				return USED;
 			case 2:
 				return BLOCK;
+			case 3:
+				return QUESTION;
 			default:
 				return null;
 		}

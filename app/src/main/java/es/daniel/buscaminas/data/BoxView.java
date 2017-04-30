@@ -1,64 +1,65 @@
 package es.daniel.buscaminas.data;
 
-import android.graphics.Color;
-import android.widget.TextView;
+import android.widget.ImageView;
 
 import es.daniel.buscaminas.R;
 
 public class BoxView {
-    private TextView textView;
+    private ImageView imageView;
 
-    public BoxView(TextView textView) {
-        this.textView = textView;
+    public BoxView(ImageView imageView) {
+        this.imageView = imageView;
     }
 
-    public TextView getTextView() {
-        return textView;
+    public ImageView getImageView() {
+        return imageView;
     }
 
     public void unboxing(Integer value) {
         switch (value) {
             case BoxType.MINE:
-                textView.setBackgroundResource(R.mipmap.box_mine);
-                return;
+                imageView.setBackgroundResource(R.mipmap.box_mine);
+                break;
             case 1:
-                textView.setTextColor(Color.RED);
+                imageView.setBackgroundResource(R.mipmap.box_open_1);
                 break;
             case 2:
-                textView.setTextColor(Color.YELLOW);
+                imageView.setBackgroundResource(R.mipmap.box_open_2);
                 break;
             case 3:
-                textView.setTextColor(Color.BLUE);
+                imageView.setBackgroundResource(R.mipmap.box_open_3);
                 break;
             case 4:
-                textView.setTextColor(Color.GREEN);
+                imageView.setBackgroundResource(R.mipmap.box_open_4);
                 break;
             case 5:
-                textView.setTextColor(Color.BLACK);
+                imageView.setBackgroundResource(R.mipmap.box_open_5);
                 break;
             case 6:
-                textView.setTextColor(Color.CYAN);
+                imageView.setBackgroundResource(R.mipmap.box_open_6);
                 break;
             case 7:
-                textView.setTextColor(Color.MAGENTA);
+                imageView.setBackgroundResource(R.mipmap.box_open_7);
                 break;
             case 8:
-                textView.setTextColor(Color.DKGRAY);
+                imageView.setBackgroundResource(R.mipmap.box_open_8);
                 break;
-        }
-        textView.setBackgroundResource(R.mipmap.box_open);
-        if(value != BoxType.VOID) {
-            textView.setText(value.toString());
+            case BoxType.VOID:
+                imageView.setBackgroundResource(R.mipmap.box_open);
+                break;
         }
     }
 
     public void changeBlockBox(Integer state) {
         switch (BoxState.fromOrdinal(state)) {
             case BLOCK :
-                textView.setBackgroundResource(R.mipmap.box_mark);
+                imageView.setBackgroundResource(R.mipmap.box_mark);
                 break;
             case NO_USED :
-                textView.setBackgroundResource(R.mipmap.box_close);
+                imageView.setBackgroundResource(R.mipmap.box_close);
+                break;
+            case QUESTION :
+                imageView.setBackgroundResource(R.mipmap.box_question);
                 break;
         }
     }

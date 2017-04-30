@@ -8,6 +8,10 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import es.daniel.buscaminas.R;
+import es.daniel.buscaminas.view.game.game.GameComponent;
+import es.daniel.buscaminas.view.game.count.CountComponent;
+import es.daniel.buscaminas.view.game.surrender.SurrenderComponent;
+import es.daniel.buscaminas.view.game.timer.TimeComponent;
 import es.daniel.buscaminas.view.home.HomeActivity;
 
 public class GameActivity extends AppCompatActivity {
@@ -18,7 +22,7 @@ public class GameActivity extends AppCompatActivity {
 
     Activity context;
     GameComponent gameComponent;
-    RestToWinComponent restToWinComponent;
+    CountComponent restToWinComponent;
     TimeComponent timeComponent;
     SurrenderComponent surrenderComponent;
 
@@ -54,7 +58,7 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void initRestToWinComponent() {
-        restToWinComponent = new RestToWinComponent(context, gameComponent.getRestToWin());
+        restToWinComponent = new CountComponent(context, gameComponent.getMinesTotal());
     }
 
     private void initGameComponent(Integer nBoxWidth, Integer nBoxHeight, Integer nMines) {
@@ -87,9 +91,14 @@ public class GameActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void restToWin(int howMany) {
-                restToWinComponent.setRestToWin(howMany);
-            }
+                public void lessCount() {
+                    restToWinComponent.lessCount();
+                }
+
+                @Override
+                public void addCount() {
+                    restToWinComponent.addCount();
+                }
         };
     }
 }

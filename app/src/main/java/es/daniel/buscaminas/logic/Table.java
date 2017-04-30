@@ -1,7 +1,9 @@
-package es.daniel.buscaminas.data;
+package es.daniel.buscaminas.logic;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import es.daniel.buscaminas.data.Box;
 
 
 public class Table {
