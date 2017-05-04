@@ -4,9 +4,10 @@ import android.app.Activity;
 import android.widget.TextView;
 
 import es.daniel.buscaminas.R;
+import es.daniel.buscaminas.logic.MineFinderGame;
 import es.daniel.buscaminas.view.game.GameActivity;
 
-public class CountComponent {
+public class CountComponent implements MineFinderGame.OnLessCountListener, MineFinderGame.OnAddCountListener {
     private static int LESS = -1;
     private static int ADD = 1;
 
@@ -14,16 +15,20 @@ public class CountComponent {
     TextView restView;
     Integer restToWin = 0;
 
-    public CountComponent(Activity context, int restToWinInit) {
+    public CountComponent(Activity context, MineFinderGame game) {
         restView = (TextView) context.findViewById(R.id.rest);
-        setRestToWin(restToWinInit);
+        setRestToWin(game.getMinesTotal());
+        game.addOnLessCountListeners(this);
+        game.addOnLessCountListeners(this);
     }
 
-    public void lessCount() {
+    @Override
+    public void onLessCount() {
         setRestToWin(LESS);
     }
 
-    public void addCount() {
+    @Override
+    public void onAddCount() {
         setRestToWin(ADD);
     }
 

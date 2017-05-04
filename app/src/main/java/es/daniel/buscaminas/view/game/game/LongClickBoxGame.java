@@ -4,14 +4,14 @@ import android.view.View;
 
 import es.daniel.buscaminas.data.Box;
 import es.daniel.buscaminas.data.BoxState;
-import es.daniel.buscaminas.logic.Game;
+import es.daniel.buscaminas.logic.MineFinderGame;
 
 public class LongClickBoxGame implements View.OnLongClickListener {
 
     Box box;
-    Game game;
+    MineFinderGame game;
 
-    LongClickBoxGame(Box box, Game game) {
+    LongClickBoxGame(Box box, MineFinderGame game) {
         this.box = box;
         this.game = game;
     }

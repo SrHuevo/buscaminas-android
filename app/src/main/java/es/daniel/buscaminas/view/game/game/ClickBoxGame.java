@@ -4,14 +4,14 @@ import android.view.View;
 
 import es.daniel.buscaminas.data.Box;
 import es.daniel.buscaminas.data.BoxState;
-import es.daniel.buscaminas.logic.Game;
+import es.daniel.buscaminas.logic.MineFinderGame;
 
 public class ClickBoxGame implements View.OnClickListener {
 
     Box box;
-    Game game;
+    MineFinderGame game;
 
-    ClickBoxGame(Box box, Game game) {
+    ClickBoxGame(Box box, MineFinderGame game) {
         this.box = box;
         this.game = game;
     }

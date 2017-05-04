@@ -61,5 +61,4 @@ public class TimeComponent {
         long secs = time / 1000 - mins * 60;
         return String.format("%02d:%02d", mins, secs);
     }
-
 }

@@ -1,8 +1,8 @@
 package es.daniel.buscaminas.view.game.game;
 
 import android.app.Activity;
-import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -12,29 +12,24 @@ import es.daniel.buscaminas.data.BoxesViews;
 import es.daniel.buscaminas.data.GameState;
 import es.daniel.buscaminas.exception.CreateGameException;
 import es.daniel.buscaminas.data.Box;
-import es.daniel.buscaminas.logic.Game;
+import es.daniel.buscaminas.lib.ViewHelper;
+import es.daniel.buscaminas.logic.MineFinderGame;
 import es.daniel.buscaminas.logic.Table;
 
-public abstract class GameComponent {
+public class GameComponent implements MineFinderGame.OnUnboxingListener, MineFinderGame.OnChangeBlockBoxListener {
 
     private static final int marginInDps = 2;
-    private static final int minWidthBoxInDps = 38;
-
-    private final int displayWidthInPx;
-    private final float density;
-    private final float minWidthBoxInPx;
-    private final float marginInPx;
+    private static final int minBoxInDps = 38;
 
     private Activity context;
-    private LinearLayout.LayoutParams layoutParams4Row;
-    private LinearLayout layoutGame;
-    private int widthBox;
-    private LinearLayout.LayoutParams layoutParams4Box;
-    private int nBoxWidth = 4;
-    private int nBoxHeight = 4;
-    private int nMines = 3;
+    private int nBoxWidth;
+    private int nBoxHeight;
+    private int nMines;
+    private int widthBoxPxs;
+    private int marginBoxPxs;
     private Table table;
-    private Game game;
+    private MineFinderGame game;
+    BoxesViews boxesViews;
 
     public GameComponent(Activity context, Integer nBoxWidth, Integer nBoxHeight, Integer nMines) {
         this.context = context;
@@ -42,18 +37,16 @@ public abstract class GameComponent {
         this.nBoxHeight = nBoxHeight;
         this.nMines = nMines;
 
-        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
-        displayWidthInPx =  displayMetrics.widthPixels;
-        density = displayMetrics.density;
-        marginInPx = marginInDps * density;
-        minWidthBoxInPx = minWidthBoxInDps * density;
+        ViewHelper viewHelper = new ViewHelper(context.getResources().getDisplayMetrics());
+        marginBoxPxs = viewHelper.dpsToPx(marginInDps);
+        widthBoxPxs = viewHelper.calcWidth(
+                viewHelper.dpsToPx(minBoxInDps), marginBoxPxs, nBoxWidth);
 
-        initParams();
-
-        BoxesViews boxesViews = paintGame();
+        LinearLayout layoutGame = (LinearLayout) context.findViewById(R.id.layout_game);
+        boxesViews = paintGame(layoutGame);
         try {
-            createGame(boxesViews);
-            setFunctionality(boxesViews);
+            createGame();
+            setFunctionality();
         } catch (CreateGameException e) {
             Log.e("GameActivity", "onCreate", e);
         }
@@ -65,39 +58,17 @@ public abstract class GameComponent {
 
     public int getMinesTotal() { return game.getMinesTotal(); }
 
-    private void initParams() {
-        layoutGame = (LinearLayout) context.findViewById(R.id.layout_game);
-
-        layoutParams4Row = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.WRAP_CONTENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT);
-
-
-        widthBox = calcWidth();
-
-        layoutParams4Box = new LinearLayout.LayoutParams(widthBox, widthBox);
-        layoutParams4Box.setMargins((int)marginInPx, (int)marginInPx, (int)marginInPx, (int)marginInPx);
+    public MineFinderGame getGame() {
+        return game;
     }
 
-    private int calcWidth() {
-        if(displayWidthInPx > (minWidthBoxInPx + marginInPx * 2) * nBoxWidth) {
-            return (int)(displayWidthInPx / nBoxWidth - marginInPx * 2);
-        } else {
-            return (int)minWidthBoxInPx;
-        }
-    }
-
-    private BoxesViews paintGame() {
+    private BoxesViews paintGame(LinearLayout layoutGame) {
         BoxesViews boxesViews = new BoxesViews(nBoxWidth, nBoxHeight);
         for(int j = 0; j < nBoxHeight; j++) {
-            LinearLayout layoutRow = new LinearLayout(context);
-            layoutRow.setOrientation(LinearLayout.HORIZONTAL);
-            layoutRow.setLayoutParams(layoutParams4Row);
+            LinearLayout layoutRow = newLayoutRow();
             layoutGame.addView(layoutRow);
             for(int i = 0; i < nBoxWidth; i++) {
-                ImageView boxView = new ImageView(context);
-                boxView.setLayoutParams(layoutParams4Box);
-                boxView.setBackgroundResource(R.mipmap.box_close);
+                ImageView boxView = newBoxView();
                 layoutRow.addView(boxView);
                 boxesViews.add(i, j, new BoxView(boxView));
             }
@@ -105,12 +76,36 @@ public abstract class GameComponent {
         return boxesViews;
     }
 
-    private void createGame(final BoxesViews boxesViews) throws CreateGameException {
-        table = new Table(nBoxWidth, nBoxHeight);
-        game = new GameCoreView(this, table, nMines, boxesViews);
+    private LinearLayout newLayoutRow() {
+        LinearLayout layoutRow = new LinearLayout(context);
+        layoutRow.setOrientation(LinearLayout.HORIZONTAL);
+        layoutRow.setLayoutParams(new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT));
+        return layoutRow;
     }
 
-    private void setFunctionality(BoxesViews boxesViews) {
+    private ImageView newBoxView() {
+        ImageView boxView = new ImageView(context);
+        boxView.setLayoutParams(getLayoutParams4Box());
+        boxView.setBackgroundResource(R.mipmap.box_close);
+        return boxView;
+    }
+
+    private LinearLayout.LayoutParams getLayoutParams4Box() {
+        LinearLayout.LayoutParams layoutParams4Box = new LinearLayout.LayoutParams(widthBoxPxs, widthBoxPxs);
+        layoutParams4Box.setMargins(marginBoxPxs, marginBoxPxs, marginBoxPxs, marginBoxPxs);
+        return layoutParams4Box;
+    }
+
+    private void createGame() throws CreateGameException {
+        table = new Table(nBoxWidth, nBoxHeight);
+        game = new MineFinderGame(table, nMines);
+        game.addOnUnboxingListener(this);
+        game.addOnChangeBlockBoxListeners(this);
+    }
+
+    private void setFunctionality() {
         for(final Box box : table.getBoxesAsList()) {
             final BoxView boxView = boxesViews.get(box.getX(), box.getY());
             boxView.getImageView().setOnClickListener(new ClickBoxGame(box, game));
@@ -118,12 +113,15 @@ public abstract class GameComponent {
         }
     }
 
-    public abstract void gameWin();
+    @Override
+    public void onChangeBlockBox(Box box) {
+        boxesViews.get(box.getX(), box.getY()).changeBlockBox(box.getState());
+    }
 
-    public abstract void gameOver();
+    @Override
+    public void onUnboxing(Box box) {
+        boxesViews.get(box.getX(), box.getY()).unboxing(box.getValue());
+    }
 
-    public abstract void lessCount();
-
-    public abstract void addCount();
 }
 

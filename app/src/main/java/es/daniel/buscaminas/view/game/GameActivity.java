@@ -8,19 +8,21 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
 import es.daniel.buscaminas.R;
+import es.daniel.buscaminas.logic.MineFinderGame;
 import es.daniel.buscaminas.view.game.game.GameComponent;
 import es.daniel.buscaminas.view.game.count.CountComponent;
 import es.daniel.buscaminas.view.game.surrender.SurrenderComponent;
 import es.daniel.buscaminas.view.game.timer.TimeComponent;
 import es.daniel.buscaminas.view.home.HomeActivity;
 
-public class GameActivity extends AppCompatActivity {
+public class GameActivity extends AppCompatActivity implements MineFinderGame.OnGameWinListener, MineFinderGame.OnGameOverListener {
 
     public static final String EXTRA_WIDTH = "0";
     public static final String EXTRA_HEIGHT = "1";
     public static final String EXTRA_MINES = "2";
 
     Activity context;
+    MineFinderGame game;
     GameComponent gameComponent;
     CountComponent restToWinComponent;
     TimeComponent timeComponent;
@@ -37,9 +39,9 @@ public class GameActivity extends AppCompatActivity {
         Integer nBoxHeight = intent.getIntExtra(EXTRA_HEIGHT, 10);
         Integer nMines = intent.getIntExtra(EXTRA_MINES, 10);
 
-        initGameComponent(nBoxWidth, nBoxHeight, nMines);
-        initRestToWinComponent();
-        initTimeComponent();
+        MineFinderGame game = initGameComponent(nBoxWidth, nBoxHeight, nMines);
+        initRestToWinComponent(game);
+        initTimeComponent(game);
         initSurrenderComponent();
     }
 
@@ -53,15 +55,44 @@ public class GameActivity extends AppCompatActivity {
         surrenderComponent = new SurrenderComponent(context);
     }
 
-    private void initTimeComponent() {
+    private void initTimeComponent(MineFinderGame game) {
         timeComponent = new TimeComponent(context);
     }
 
-    private void initRestToWinComponent() {
-        restToWinComponent = new CountComponent(context, gameComponent.getMinesTotal());
+    private void initRestToWinComponent(MineFinderGame game) {
+        restToWinComponent = new CountComponent(context, game);
     }
 
-    private void initGameComponent(Integer nBoxWidth, Integer nBoxHeight, Integer nMines) {
+    private MineFinderGame initGameComponent(Integer nBoxWidth, Integer nBoxHeight, Integer nMines) {
+
+        GameComponent gameComponent = new GameComponent(context, nBoxWidth, nBoxHeight, nMines);
+        game = gameComponent.getGame();
+        game.addOnGameWinListeners(this);
+        game.addOnGameOverListeners(this);
+        return game;
+    }
+
+    @Override
+    public void onGameWin() {
+        timeComponent.stop();
+        surrenderComponent.finish(game.getState());
+        AlertDialog.Builder builder = getBuilder();
+        builder.setMessage("You win the game!!");
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    @Override
+    public void onGameOver() {
+        timeComponent.stop();
+        surrenderComponent.finish(game.getState());
+        AlertDialog.Builder builder = getBuilder();
+        builder.setMessage("You lose the game!!");
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
+    private AlertDialog.Builder getBuilder() {
         final AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setPositiveButton(
                 "Ok",
@@ -71,34 +102,7 @@ public class GameActivity extends AppCompatActivity {
                         context.startActivity(new Intent(context, HomeActivity.class));
                     }
                 });
-        gameComponent = new GameComponent(context, nBoxWidth, nBoxHeight, nMines){
-                @Override
-                public void gameWin() {
-                    timeComponent.stop();
-                    surrenderComponent.finish(gameComponent.getState());
-                    builder.setMessage("You win the game!!");
-                    AlertDialog alert = builder.create();
-                    alert.show();
-                }
-
-                @Override
-                public void gameOver() {
-                    timeComponent.stop();
-                    surrenderComponent.finish(gameComponent.getState());
-                    builder.setMessage("You lose the game!!");
-                    AlertDialog alert = builder.create();
-                    alert.show();
-                }
-
-                @Override
-                public void lessCount() {
-                    restToWinComponent.lessCount();
-                }
-
-                @Override
-                public void addCount() {
-                    restToWinComponent.addCount();
-                }
-        };
+        return builder;
     }
+
 }
